@@ -16,6 +16,9 @@
 //   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+#include <iostream>
+#include <iomanip>
+
 #include "cpu.h"
 #include "memory.h"
 #include "savestate.h"
@@ -502,6 +505,7 @@ void CPU::process(unsigned long const cycles) {
 			}
 		} else while (cycleCounter < mem_.nextEventTime()) {
 			unsigned char opcode;
+                        bool cbInstruction = false;
 
 			PC_READ(opcode);
 
@@ -526,7 +530,7 @@ void CPU::process(unsigned long const cycles) {
 				inc_r(b);
 				break;
 			case 0x05:
-				dec_r(b); 
+				dec_r(b);
 				break;
 			case 0x06:
 				PC_READ(b);
@@ -1208,6 +1212,7 @@ void CPU::process(unsigned long const cycles) {
 
 				// CB OPCODES (Shifts, rotates and bits):
 			case 0xCB:
+                                cbInstruction = true;
 				PC_READ(opcode);
 
 				switch (opcode) {
@@ -1978,10 +1983,33 @@ void CPU::process(unsigned long const cycles) {
 				rst_n(0x38);
 				break;
 			}
-		}
 
-		pc_ = pc;
-		cycleCounter = mem_.event(cycleCounter);
+                unsigned int temp_hf2 = updateHf2FromHf1(hf1, hf2);
+
+                #define FORMAT_ADDRESS( VALUE, SIZE ) '$' << std::hex << std::setw( SIZE / 4 ) << std::setfill( '0' ) << static_cast< unsigned int >( VALUE )
+                #define FORMAT_HEXADECIMAL( VALUE, SIZE ) "0x" << std::hex << std::setw( SIZE / 4 ) << std::setfill( '0' ) << static_cast< unsigned int >( VALUE )
+                #define REGISTER( NAME, VALUE, SIZE ) NAME << ':' << FORMAT_HEXADECIMAL( VALUE, SIZE )
+
+                std::cout << "[instruction]"
+                   << ' ' << FORMAT_ADDRESS( pc_, 16 )
+                   << ' ' << FORMAT_HEXADECIMAL( cbInstruction ? 0xCB00 | opcode : opcode, 16 )
+                   << ' ' << REGISTER( "a", a, 8 )
+                   << ' ' << REGISTER( "f", toF( temp_hf2, cf, zf ), 8 )
+                   << ' ' << REGISTER( "b", b, 8 )
+                   << ' ' << REGISTER( "c", c, 8 )
+                   << ' ' << REGISTER( "d", d, 8 )
+                   << ' ' << REGISTER( "e", e, 8 )
+                   << ' ' << REGISTER( "h", h, 8 )
+                   << ' ' << REGISTER( "l", l, 8 )
+                   << ' ' << REGISTER( "sp", sp, 16 )
+                   << ' ' << REGISTER( "pc", pc, 16 )
+                   << '\n';
+
+            }
+
+            pc_ = pc;
+            cycleCounter = mem_.event(cycleCounter);
+
 	}
 
 	a_ = a;
