@@ -2001,8 +2001,8 @@ void CPU::process(unsigned long const cycles) {
                    << ' ' << REGISTER( "e", e, 8 )
                    << ' ' << REGISTER( "h", h, 8 )
                    << ' ' << REGISTER( "l", l, 8 )
-                   << ' ' << REGISTER( "sp", sp, 16 )
                    << ' ' << REGISTER( "pc", pc, 16 )
+                   << ' ' << REGISTER( "sp", sp, 16 )
                    << '\n';
 
             }
