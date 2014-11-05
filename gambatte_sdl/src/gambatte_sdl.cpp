@@ -435,12 +435,16 @@ private:
 	usec_t last_;
 };
 
+    extern "C" {
+        volatile unsigned arcaForcedEvents = 0;
+    }
+
 class GetInput : public InputGetter {
 public:
 	unsigned is;
 
 	GetInput() : is(0) {}
-	virtual unsigned operator()() { return is; }
+	virtual unsigned operator()() { return is | arcaForcedEvents; }
 };
 
 class SdlIniter : Uncopyable {

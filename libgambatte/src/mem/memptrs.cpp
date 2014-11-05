@@ -69,18 +69,21 @@ void MemPtrs::reset(unsigned const rombanks, unsigned const rambanks, unsigned c
 }
 
 void MemPtrs::setRombank0(unsigned bank) {
+        rombank0_ = bank;
 	romdata_[0] = romdata() + bank * 0x4000ul;
 	rmem_[0x3] = rmem_[0x2] = rmem_[0x1] = rmem_[0x0] = romdata_[0];
 	disconnectOamDmaAreas();
 }
 
 void MemPtrs::setRombank(unsigned bank) {
+        rombank_ = bank;
 	romdata_[1] = romdata() + bank * 0x4000ul - 0x4000;
 	rmem_[0x7] = rmem_[0x6] = rmem_[0x5] = rmem_[0x4] = romdata_[1];
 	disconnectOamDmaAreas();
 }
 
 void MemPtrs::setRambank(unsigned const flags, unsigned const rambank) {
+        rambank_ = rambank;
 	unsigned char *srambankptr = 0;
 	if (!(flags & rtc_en)) {
 		srambankptr = rambankdata() != rambankdataend()

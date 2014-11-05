@@ -60,7 +60,15 @@ public:
 	void setWrambank(unsigned bank);
 	void setOamDmaSrc(OamDmaSrc oamDmaSrc);
 
+        unsigned getRombank0(void) const { return rombank0_; }
+        unsigned getRombank(void) const { return rombank_; }
+        unsigned getRambank(void) const { return rambank_; }
+
 private:
+        unsigned rombank0_;
+        unsigned rombank_;
+        unsigned rambank_;
+
 	unsigned char const *rmem_[0x10];
 	unsigned char       *wmem_[0x10];
 	unsigned char *romdata_[2];

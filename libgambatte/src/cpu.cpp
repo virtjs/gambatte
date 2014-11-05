@@ -22,6 +22,9 @@
 #include "cpu.h"
 #include "memory.h"
 #include "savestate.h"
+#include "inputgetter.h"
+
+extern unsigned arcaForcedEvents;
 
 namespace gambatte {
 
@@ -505,7 +508,9 @@ void CPU::process(unsigned long const cycles) {
 			}
 		} else while (cycleCounter < mem_.nextEventTime()) {
 			unsigned char opcode;
+
                         bool cbInstruction = false;
+                        unsigned short instructionPc = pc;
 
 			PC_READ(opcode);
 
@@ -1989,18 +1994,26 @@ void CPU::process(unsigned long const cycles) {
                 #define FORMAT_ADDRESS( VALUE, SIZE ) '$' << std::hex << std::setw( SIZE / 4 ) << std::setfill( '0' ) << static_cast< unsigned int >( VALUE )
                 #define FORMAT_HEXADECIMAL( VALUE, SIZE ) "0x" << std::hex << std::setw( SIZE / 4 ) << std::setfill( '0' ) << static_cast< unsigned int >( VALUE )
                 #define REGISTER( NAME, VALUE, SIZE ) NAME << ':' << FORMAT_HEXADECIMAL( VALUE, SIZE )
+                #define MEMORY( ADDRESS ) std::hex << std::setw( 4 ) << std::setfill( '0' ) << ( ADDRESS ) << ':' << FORMAT_HEXADECIMAL( mem_.read( ( ADDRESS ), cycleCounter ), 8 )
+
+                // The 'arcaForcedEvents' variable allows to trigger input events
+                //
+                // ex :
+                //
+                //     if ( pc == 0x0100 ) {
+                //         arcaForcedEvents |= InputGetter::START;
+                //     }
 
                 std::cout << "[instruction]"
-                   << ' ' << FORMAT_ADDRESS( pc_, 16 )
+                   << ' ' << FORMAT_ADDRESS( instructionPc, 16 )
                    << ' ' << FORMAT_HEXADECIMAL( cbInstruction ? 0xCB00 | opcode : opcode, 16 )
-                   << ' ' << REGISTER( "a", a, 8 )
-                   << ' ' << REGISTER( "f", toF( temp_hf2, cf, zf ), 8 )
-                   << ' ' << REGISTER( "b", b, 8 )
-                   << ' ' << REGISTER( "c", c, 8 )
-                   << ' ' << REGISTER( "d", d, 8 )
-                   << ' ' << REGISTER( "e", e, 8 )
-                   << ' ' << REGISTER( "h", h, 8 )
-                   << ' ' << REGISTER( "l", l, 8 )
+                   << " rom:" << FORMAT_HEXADECIMAL( mem_.getCartridge( ).getRombank( ), 8 )
+                   << " ram:" << FORMAT_HEXADECIMAL( mem_.getCartridge( ).getRambank( ), 8 )
+                   << " ime:" << FORMAT_HEXADECIMAL( mem_.ime( ), 8 )
+                   << ' ' << REGISTER( "af", ( a << 8 | toF( temp_hf2, cf, zf ) ), 16 )
+                   << ' ' << REGISTER( "bc", bc( ), 16 )
+                   << ' ' << REGISTER( "de", de( ), 16 )
+                   << ' ' << REGISTER( "hl", hl( ), 16 )
                    << ' ' << REGISTER( "pc", pc, 16 )
                    << ' ' << REGISTER( "sp", sp, 16 )
                    << '\n';

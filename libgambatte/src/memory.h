@@ -109,6 +109,8 @@ public:
 	void setGameShark(std::string const &codes) { interrupter_.setGameShark(codes); }
 	void updateInput();
 
+        Cartridge const & getCartridge(void) const { return cart_; }
+
 private:
 	Cartridge cart_;
 	unsigned char ioamhram_[0x200];

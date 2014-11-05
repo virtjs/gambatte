@@ -70,6 +70,10 @@ public:
 	class PakInfo const pakInfo(bool multicartCompat) const;
 	void setGameGenie(std::string const &codes);
 
+        unsigned getRombank0() const { return memptrs_.getRombank0(); }
+        unsigned getRombank() const { return memptrs_.getRombank(); }
+        unsigned getRambank() const { return memptrs_.getRambank(); }
+
 private:
 	struct AddrData {
 		unsigned long addr;
